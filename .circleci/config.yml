@@ -18,7 +18,8 @@ jobs:
       - run:
           name: Checkout integration branch
           command: git checkout master
-          command: ls
+          command: git rev-parse --abbrev-ref HEAD
+
 
 
   build:
