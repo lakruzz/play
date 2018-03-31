@@ -26,7 +26,8 @@ jobs:
           command: git rev-parse --abbrev-ref HEAD
       - run:
           name: Merge in the dev-branch
-          command: "git merge --ff-only $CIRCLE_BRANCH"
+          command: |
+            git merge --ff-only $CIRCLE_BRANCH
 
 
   build:
