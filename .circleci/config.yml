@@ -29,8 +29,7 @@ jobs:
       - run:
           name: Merge in the dev-branch
           command: |
-            git merge --ff-only $CIRCLE_BRANCH
-            echo $CIRCLE_BRANCH
+            git merge --ff-only `echo $CIRCLE_BRANCH`
 
 
 
