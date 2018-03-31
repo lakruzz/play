@@ -15,6 +15,10 @@ jobs:
       - run:
           name: Circle CI environment
           command: 'env | sort | grep "CIRCLE"'
+      - run:
+          name: Checkout integration branch
+          command: git checkout master
+          command: ls
 
 
   build:
