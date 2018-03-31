@@ -16,11 +16,17 @@ jobs:
           name: Circle CI environment
           command: 'env | sort | grep "CIRCLE"'
       - run:
+          name: Rebase to master
+          command: git rebase master
+      - run:
           name: Checkout integration branch
           command: git checkout master
       - run:
           name: Get the Symbolich name of HEAD
           command: git rev-parse --abbrev-ref HEAD
+      - run:
+          name: Merge in the dev-branch
+          command: git merge
 
 
 
