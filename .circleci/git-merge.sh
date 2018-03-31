@@ -11,5 +11,7 @@ git checkout master
 echo git pull
 git pull
 
+git rev-parse --short HEAD
+
 echo  git merge --ff-only $CIRCLE_SHA1
 git merge --ff-only $CIRCLE_SHA1
