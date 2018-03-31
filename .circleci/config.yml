@@ -11,7 +11,7 @@ jobs:
       - checkout
       - run:
           name: git version
-          command: git -v
+          command: git --version
       - run:
           name: Circle CI environment
           command: 'env | sort | grep "CIRCLE"'
