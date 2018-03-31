@@ -26,7 +26,7 @@ jobs:
           command: git rev-parse --abbrev-ref HEAD
       - run:
           name: Merge in the dev-branch
-          command: ./circleci/git-merge.sh
+          command: .circleci/git-merge.sh
 
 
 
