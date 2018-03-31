@@ -11,5 +11,5 @@ git checkout master
 echo git pull
 git pull
 
-echo  git merge --ff-only $CIRCLE_BRANCH
-git merge --ff-only $CIRCLE_BRANCH
+echo  git merge --ff-only $CIRCLE_SHA1
+git merge --ff-only $CIRCLE_SHA1
