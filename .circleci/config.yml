@@ -27,6 +27,7 @@ jobs:
       - run:
           name: Merge in the dev-branch
           command: |
+            export CIRCLE_BRANCH=$CIRCLE_BRANCH
             git merge --ff-only $CIRCLE_BRANCH
 
 
