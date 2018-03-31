@@ -26,8 +26,12 @@ jobs:
           command: git rev-parse --abbrev-ref HEAD
       - run:
           name: Merge in the dev-branch
+<<<<<<< Updated upstream
           command: git merge
 
+=======
+          command: git merge --ff-only $CIRCLE_BRANCH
+>>>>>>> Stashed changes
 
 
   build:
