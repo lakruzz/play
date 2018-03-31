@@ -7,8 +7,6 @@ jobs:
     # The primary container is an instance of the first list image listed. Your build commands run in this container.
     docker:
       - image: lakruzz/jekyll-plus:1.0.1
-    environment:
-      CIRCLE_BRANCH: $CIRCLE_BRANCH
     steps:
       - checkout
       - run:
@@ -28,8 +26,7 @@ jobs:
           command: git rev-parse --abbrev-ref HEAD
       - run:
           name: Merge in the dev-branch
-          command: |
-            git merge --ff-only `echo $CIRCLE_BRANCH`
+          command: ./circleci/git-merge.sh
 
 
 
