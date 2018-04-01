@@ -13,6 +13,14 @@ git config user.email "circleci@lakruzz.com"
 
 $SCRIPTDIR/integrate.sh
 
-echo $ git push
+echo Delivering to GitHub
+echo $ git push ghtoken
 [ ! -z "$DRYRUN" ] ||  git push ghtoken
-git rev-parse --short HEAD
+
+
+if [ ! -z "$CIRCLE_BRANCH" ]
+then
+  echo Delete the branch that was just integrated
+  echo $ git push ghtoken :$CIRCLE_BRANCH
+  git push ghtoken :$CIRCLE_BRANCH
+fi
