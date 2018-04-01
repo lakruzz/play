@@ -16,17 +16,8 @@ jobs:
           name: Circle CI environment
           command: 'env | sort | grep "CIRCLE"'
       - run:
-          name: Rebase to master
-          command: git rebase origin/master
-      - run:
-          name: Checkout integration branch
-          command: |
-            git checkout master
-            git pull
-            git rev-parse --abbrev-ref HEAD
-      - run:
-          name: Merge in the dev-branch
-          command: .circleci/git-merge.sh
+          name: Swap to master and integrate
+          command: .circleci/integrate.sh
 
 
 

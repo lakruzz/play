@@ -1,6 +1,5 @@
 #!/bin/sh
 
-# Verify that we're in the root of the repo
 PWD=`pwd`
 if ! REPOROOT=`git rev-parse --show-toplevel` || [ $PWD != $REPOROOT ]
 then
@@ -10,11 +9,6 @@ then
   echo "  CD into the root of the repo before execution"
   exit 1
 fi
-
-VERSION=`git rev-parse --short HEAD`
-REPONAME=`basename $REPOROOT`
-ZIPFILE=$REPONAME\_$VERSION.zip
-GITREPO=`git remote get-url  origin | sed  s/'.*github.com[\/:]//' | sed s/.git//`
 
 if git status --porcelain | grep "??"
 then
