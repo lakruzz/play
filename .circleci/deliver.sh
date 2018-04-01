@@ -3,7 +3,9 @@
 #Die if we have to
 set -e
 
-./integrate.sh
+SCRIPTDIR=`dirname $0`
+
+$SCRIPTDIR/integrate.sh
 
 echo $ git push
 [ ! -z "$DRYRUN" ] ||  git push
