@@ -64,10 +64,10 @@ workflows:
   version: 2
   ready_for_jekyll:
     jobs:
-      - integrate
+      - validate_integration
       - build:
           requires:
-            - integrate
+            - validate_integration
       - test:
           requires:
             - build
