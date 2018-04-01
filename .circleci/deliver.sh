@@ -3,13 +3,15 @@
 #Die if we have to
 set -e
 
-SCRIPTDIR=`dirname $0`
 GITREPO=`git remote get-url  origin | sed  s/'.*github.com[\/:]//' | sed s/.git//`
+SCRIPTDIR=`dirname $0`
 
 git config user.name "Circle CI by @Lakruzz"
 git config user.email "circleci@lakruzz.com"
 #git config --global push.default simple
-git remote add ghtoken https://$(printenv GHTOKEN)@github.com/$(printenv GITREPO).git
+`git remote add ghtoken https://$GHTOKEN@github.com/$GITREPO.git`
+
+exit
 
 $SCRIPTDIR/integrate.sh
 
