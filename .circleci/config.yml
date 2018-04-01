@@ -3,6 +3,7 @@ version: 2
 jobs:
 
   integrate:
+    name: Validate integration
     working_directory: /app
     # The primary container is an instance of the first list image listed. Your build commands run in this container.
     docker:
@@ -17,11 +18,6 @@ jobs:
       - run:
           name: Swap to master and integrate
           command: .circleci/integrate.sh
-      - save_cache:
-          key: integrated-{{ .Revision }}
-          paths:
-            - ".git"
-            - "version.txt"
 
   build:
     working_directory: /app
@@ -29,9 +25,10 @@ jobs:
     docker:
       - image: lakruzz/jekyll-plus:1.0.1
     steps:
-      - restore_cache:
-          keys:
-            - integrated-{{ .Revision }}
+      - checkout
+      - run:
+          name: Swap to master and integrate
+          command: .circleci/integrate.sh
       - run:
           name: Where am I
           command: |
