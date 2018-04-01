@@ -10,11 +10,10 @@ jobs:
     steps:
       - checkout
       - run:
-          name: git version
-          command: git --version
-      - run:
-          name: Circle CI environment
-          command: 'env | sort | grep "CIRCLE"'
+          name: Environment
+          command: |
+            git --version
+            'env | sort | grep "CIRCLE"'
       - run:
           name: Swap to master and integrate
           command: .circleci/integrate.sh
@@ -31,9 +30,9 @@ jobs:
       - image: lakruzz/jekyll-plus:1.0.1
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - integrated-{{ .Revision }}
+#      - restore_cache:
+#          keys:
+#            - integrated-{{ .Revision }}
       - run:
           name: Branch
           command: git status
