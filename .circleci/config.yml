@@ -70,12 +70,12 @@ jobs:
 workflows:
   version: 2
   ready_for_jekyll:
-    filters:
-      branches:
-        only:
-          - ready/*
     jobs:
-      - validate_integration
+      - validate_integration:
+          filters:
+            branches:
+              only:
+                - ready/*
       - build:
           requires:
             - validate_integration
