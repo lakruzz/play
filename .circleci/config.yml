@@ -75,7 +75,7 @@ workflows:
           filters:
             branches:
               only:
-                - ready/*
+                - ready/.*
       - build:
           requires:
             - validate_integration
