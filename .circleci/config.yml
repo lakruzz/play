@@ -21,7 +21,8 @@ jobs:
       - save_cache:
           key: integrated-{{ .Revision }}
           paths:
-            - ".."
+            - ".git"
+            - "version.txt"
 
   build:
     working_directory: /app
@@ -29,9 +30,13 @@ jobs:
     docker:
       - image: lakruzz/jekyll-plus:1.0.1
     steps:
+      - checkout
       - restore_cache:
           keys:
             - integrated-{{ .Revision }}
+      - run:
+          name: Branch
+          command: git status
       - run:
           name: Jekyll
           command: jekyll build
