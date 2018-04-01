@@ -29,7 +29,6 @@ jobs:
     docker:
       - image: lakruzz/jekyll-plus:1.0.1
     steps:
-      - checkout
       - restore_cache:
           keys:
             - integrated-{{ .Revision }}
