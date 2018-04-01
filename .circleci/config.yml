@@ -21,8 +21,7 @@ jobs:
       - save_cache:
           key: integrated-{{ .Revision }}
           paths:
-            - ".git"
-            - "version.txt"
+            - "."
 
   build:
     working_directory: /app
