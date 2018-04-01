@@ -20,6 +20,9 @@ jobs:
           command: .circleci/integrate.sh
       - save_cache:
           key: integrated-{{ .BuildNum }}
+          paths:
+            - ".git"
+            - "version.txt"
 
   build:
     working_directory: /app
