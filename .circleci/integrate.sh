@@ -38,5 +38,5 @@ git rev-parse --short HEAD
 echo $ git merge --ff-only $VER
 [ ! -z "$DRYRUN" ] ||  git merge --ff-only $VER
 
-echo "$VERSION of $GITREPO" > version.txt
-echo "$VERSION of $GITREPO"
+echo "$VER of $GITREPO" > version.txt
+echo "$VER of $GITREPO"

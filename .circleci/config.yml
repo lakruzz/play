@@ -19,7 +19,7 @@ jobs:
           name: Swap to master and integrate
           command: .circleci/integrate.sh
       - save_cache:
-          key: integrated-{{ .BuildNum }}
+          key: integrated-{{ .Revision }}
           paths:
             - ".git"
             - "version.txt"
@@ -32,12 +32,12 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - integrated-{{ .BuildNum }}
+            - integrated-{{ .Revision }}
       - run:
           name: Jekyll
           command: jekyll build
       - save_cache:
-          key: the-site-{{ .BuildNum }}
+          key: the-site-{{ .Revision }}
           paths:
             - _site
 
@@ -48,7 +48,7 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - the-site-{{ .BuildNum }}
+            - the-site-{{ .Revision }}
       - run:
           name: Htmlproofer
           command: htmlproofer --disable-external --allow-hash-href --checks-to-ignore ImageCheck --check-favicon _site
