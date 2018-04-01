@@ -18,8 +18,8 @@ jobs:
       - run:
           name: Swap to master and integrate
           command: .circleci/integrate.sh
-
-
+      - save_cache:
+          key: integrated-{{ .BuildNum }}
 
   build:
     working_directory: /app
@@ -27,12 +27,14 @@ jobs:
     docker:
       - image: lakruzz/jekyll-plus:1.0.1
     steps:
-      - checkout
+      - restore_cache:
+          keys:
+            - integrated-{{ .BuildNum }}
       - run:
           name: Jekyll
           command: jekyll build
       - save_cache:
-          key: the-site-{{ .Revision }}
+          key: the-site-{{ .BuildNum }}
           paths:
             - _site
 
@@ -43,11 +45,7 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - the-site-{{ .Revision }}
-
-      - run:
-          name: List
-          command: 'ls'
+            - the-site-{{ .BuildNum }}
       - run:
           name: Htmlproofer
           command: htmlproofer --disable-external --allow-hash-href --checks-to-ignore ImageCheck --check-favicon _site
@@ -57,7 +55,9 @@ workflows:
   build_and_test:
     jobs:
       - integrate
-#      - build
-#      - test:
-#          requires:
-#            - build
+      - build:
+          requires:
+            - integrate
+      - test:
+          requires:
+            - build

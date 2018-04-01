@@ -13,6 +13,8 @@ VERSION=${CIRCLE_SHA1:=`git rev-parse HEAD`}
 VER=`echo $VERSION | cut -c 1-7`
 TARGETVER=`git rev-parse --short $REMOTEBRANCH`
 
+GITREPO=`git remote get-url  origin | sed  s/'.*github.com[\/:]//' | sed s/.git//`
+
 echo "Summary of diffs against current version ($VER) and $REMOTEBRANCH ($TARGETVER):"
 git --no-pager diff --minimal --dirstat=changes,lines,files,cumulative --summary $TARGETVER..$VER
 
@@ -35,4 +37,6 @@ git rev-parse --short HEAD
 
 echo $ git merge --ff-only $VER
 [ ! -z "$DRYRUN" ] ||  git merge --ff-only $VER
-git rev-parse --short HEAD
+
+echo "$VERSION of $GITREPO" > version.txt
+echo "$VERSION of $GITREPO"
