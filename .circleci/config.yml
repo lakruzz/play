@@ -79,5 +79,5 @@ workflows:
           requires:
             - build
       - deliver:
-          reguires:
+          requires:
             - test
