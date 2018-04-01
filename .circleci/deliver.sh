@@ -11,8 +11,6 @@ git config user.email "circleci@lakruzz.com"
 #git config --global push.default simple
 `git remote add ghtoken https://$GHTOKEN@github.com/$GITREPO.git`
 
-exit
-
 $SCRIPTDIR/integrate.sh
 
 echo $ git push
