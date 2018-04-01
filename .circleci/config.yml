@@ -32,9 +32,6 @@ jobs:
           name: Swap to target branch and integrate
           command: .circleci/integrate.sh
       - run:
-          name: Write the repo name and version to file
-          command: .circleci/write-version.sh
-      - run:
           name: Where am I
           command: |
             pwd
@@ -60,6 +57,16 @@ jobs:
           name: Htmlproofer
           command: htmlproofer --disable-external --allow-hash-href --checks-to-ignore ImageCheck --check-favicon _site
 
+  deliver:
+    working_directory: /app
+    docker:
+      - image: lakruzz/jekyll-plus:1.0.1
+    steps:
+      - checkout
+      - run:
+          name: Deliver
+          command: .circleci/deliver.sh
+
 workflows:
   version: 2
   ready_for_jekyll:
@@ -71,3 +78,6 @@ workflows:
       - test:
           requires:
             - build
+      - deliver:
+          reguires:
+            - test
