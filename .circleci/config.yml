@@ -13,7 +13,7 @@ jobs:
           name: Environment
           command: |
             git --version
-            'env | sort | grep "CIRCLE"'
+            env | sort | grep "CIRCLE"
       - run:
           name: Swap to master and integrate
           command: .circleci/integrate.sh
