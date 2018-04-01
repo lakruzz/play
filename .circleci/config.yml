@@ -17,7 +17,11 @@ jobs:
       - run:
           name: Swap to master and integrate
           command: .circleci/integrate.sh
-
+      - save_cache:
+          key: integrated-{{ .Revision }}
+          paths:
+            - ".git"
+            - "version.txt"
 
   build:
     working_directory: /app
@@ -26,9 +30,16 @@ jobs:
       - image: lakruzz/jekyll-plus:1.0.1
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - integrated-{{ .Revision }}
       - run:
-          name: Swap to master and integrate
-          command: .circleci/integrate.sh
+          name: Where am I
+          command: |
+            git status
+            ls -a
+            cat version.txt
+            git rev-parse --short HEAD
       - run:
           name: Jekyll
           command: jekyll build
