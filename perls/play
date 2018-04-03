@@ -28,6 +28,7 @@ our %Options;
 %Options = (
           manuscript => "$scriptdir/.manuscript.yml",
           dryrun => 0,
+          debug => 0,
           verbose => 0
         );
 
@@ -36,6 +37,7 @@ GetOptions(
   (
   	"part=s"              => \$Options{part},
 		"verbose!"             => \$Options{verbose},
+    "debug"                => \$Options{debug},
 		"dryrun"               => \$Options{dryrun},
 		"help"                 => sub { pod2usage(-exitval => 0, -verbose => 1) },
     "man"                  => sub { pod2usage(-exitval => 0, -verbose => 3) }
@@ -54,21 +56,34 @@ our $Yaml = YAML::Tiny->read( $Options{manuscript});
 $Options{verbose} && prettydump('\%Options');
 $Options{verbose} && prettydump('\$Yaml->[0]->{manuscript}');
 
-foreach my $var (keys($Yaml->[0]->{manuscript}->{props})){
-  foreach my $varkey (keys($Yaml->[0]->{manuscript}->{props}->[$var])){
-    my $varval = $Yaml->[0]->{manuscript}->{props}->[$var]->{$varkey};
-    my $c = $varval;
-    if ($varval =~ /`/g || $varval =~ /\$\{/g)
-    {
-      $c = qx "echo $varval";
-    };
-     eval '$ENV{$varkey} = $c';
-     $Options{verbose} && `printenv $varval`;
-  };
-};
+get_props();
 
 exit(0);
 #########  Functions  ###########################
+sub get_props(){
+  defined $Yaml->[0]->{manuscript}->{props} &&
+    props_injecter($Yaml->[0]->{manuscript}->{props});
+  defined $Yaml->[0]->{manuscript}->{parts}->{$Options{part}}->{props} &&
+    props_injecter($Yaml->[0]->{manuscript}->{parts}->{$Options{part}}->{props});
+
+
+}
+
+sub props_injecter($){
+  my $props = shift;
+  foreach my $var (keys($props)){
+    foreach my $varkey (keys($props->[$var])){
+      my $varval = $props->[$var]->{$varkey};
+      my $c = $varval;
+      if ($varval =~ /`/g || $varval =~ /\$\{/g)
+      {
+        $c = qx "echo $varval";
+      };
+      eval '$ENV{$varkey} = $c';
+      $Options{verbose} && print $varkey."=".`printenv $varkey`;
+    };
+  };
+}
 
 sub prettydump($){
 # Used for debugging - dumps a pretty print of
