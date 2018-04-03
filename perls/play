@@ -1,0 +1,240 @@
+#!/usr/bin/perl
+require 5.14.0;
+use strict;                # http://perldoc.perl.org/strict.html
+use Carp;                  # http://perldoc.perl.org/Carp.html
+use Cwd;                   # http://perldoc.perl.org/Cwd.html
+use Data::Dumper;          # https://perldoc.perl.org/Data/Dumper.html
+use JSON::PP;              # http://search.cpan.org/~makamaka/JSON-PP-2.27400/lib/JSON/PP.pm Included in perl cores since 5.14
+
+
+
+# File version
+our $VERSION    = "1.0";                             #major.minor
+our $PATCH      = "0";                               #patch
+
+use Getopt::Long;          # http://perldoc.perl.org/Getopt/Long.html
+use Pod::Usage;            # http://perldoc.perl.org/Pod/Usage.html
+use File::Basename;        # http://perldoc.perl.org/File/Basename.html
+
+my $scriptdir = dirname(__FILE__);
+
+# Assume local modules are in sub folders relative to this script
+use lib dirname(__FILE__).'/modules';
+use YAML::Tiny;            # http://search.cpan.org/dist/YAML-Tiny/lib/YAML/Tiny.pm
+
+# Holds the global variables that are used to cache the value of our options
+our %Options;
+
+%Options = (
+          manuscript => "$scriptdir/.manuscript.yml",
+          dryrun => 0,
+          verbose => 0
+        );
+
+
+GetOptions(
+  (
+  	"part=s"              => \$Options{part},
+		"verbose!"             => \$Options{verbose},
+		"dryrun"               => \$Options{dryrun},
+		"help"                 => sub { pod2usage(-exitval => 0, -verbose => 1) },
+    "man"                  => sub { pod2usage(-exitval => 0, -verbose => 3) }
+	)
+) || pod2usage(-exitval => 1, -verbose => 0);
+
+defined( $Options{part} ) || pod2usage(
+	-exitval => 1,
+	-verbose => 0,
+	-message => "--part is required");
+
+#########  Main program  ########################
+
+our $Yaml = YAML::Tiny->read( $Options{manuscript});
+
+$Options{verbose} && prettydump('\%Options');
+$Options{verbose} && prettydump('\$Yaml->[0]->{manuscript}');
+
+foreach my $var (keys($Yaml->[0]->{manuscript}->{props})){
+  foreach my $varkey (keys($Yaml->[0]->{manuscript}->{props}->[$var])){
+    my $varval = $Yaml->[0]->{manuscript}->{props}->[$var]->{$varkey};
+    my $c = $varval;
+    if ($varval =~ /`/g || $varval =~ /\$\{/g)
+    {
+      $c = qx "echo $varval";
+    };
+     eval '$ENV{$varkey} = $c';
+     $Options{verbose} && `printenv $varval`;
+  };
+};
+
+exit(0);
+#########  Functions  ###########################
+
+sub prettydump($){
+# Used for debugging - dumps a pretty print of
+# the content of the valiable passed in - by name
+# Example:
+#    my $scalar = "test";
+#    my @list = (1,2,'abd');
+#    my %hash = ('b' => 'abc','a' => 1);
+#    prettydump('\$scalar');
+#    prettydump('\@list');
+#    prettydump('\%hash');
+
+    my $name = shift;
+    my $prettyname = $name =~ s/^\\//r;
+    my $ref = eval("$name");
+
+    my $dump = Dumper($ref) =~
+      s/\$VAR1/$prettyname/r =~
+      s/('token'.*=>.*)'.*'/$1 '**NOT SHOWN**'/gr;
+
+    if ($name ne $prettyname){
+      $dump = $dump =~
+        s/(^.*=\s*)[\{\[]/$1\(/r =~
+        s/[\}\]];$/\);/r;
+    }
+    print $dump;
+}
+
+sub cmd ($) {
+# Safe execution of shell commands
+# Input is a hash containing the options and parameters to execute:
+#
+# command      [requied]      The command to execute
+# die_on_err   [optional=1]   When set to true, the program will terminate,
+#                             using croak, if the command execution returns
+#                             a non-zero value.
+# verbose      [optional=0]   When true, the command will be typed to STDOUT
+#                             just prior to execution.
+# return_array [optional=0]   When true result returns an array, false returns
+#                             scalar.
+# merge_errout [optional=1]   True merges ERROUT into STDOUT, false returns only
+#                             STDOUT, ERROUT is unhandled (still prints)
+#
+# The example below executes 'git push' in verbose mode, and continues even if
+# it fails - The return code is (as always) available from $?
+#
+#my $res =	cmd(
+#		command => 'git push',
+#		verbose => $Options{verbose},
+#   die_on_error => 0 );
+
+    my %opt = @_;
+    croak "input parameter for key 'command' required" unless ( $opt{command} );
+
+    # Deal with defaults if unset
+		defined( $opt{command} )     ||  do { croak "input parameter for key 'command' required" };
+    defined( $opt{die_on_err} )   ||  do {$opt{die_on_err}   = 1};
+		defined( $opt{merge_errout} ) ||  do {$opt{merge_errout} = 1};
+		defined( $opt{verbose} )      ||  do {$opt{verbose}      = $Options{verbose}};
+		defined( $opt{return_array} ) ||  do {$opt{return_array} = 0};
+
+    #merge_errout
+		my $cmd = ( $opt{merge_output} )? $opt{command} . ' 2>&1' : $opt{command};
+
+    # verbose
+		$opt{verbose} && print $opt{command}."\n";
+    my @res = qx($cmd);
+
+    # die_on_err
+    if ( $opt{die_on_err} ) {
+        if ($?) {
+            croak "Execution of [$cmd] returned a non-zero value (".( ($?) / 256 ).")";
+        }
+    };
+
+		#return_array
+    return ( $opt{return_array} ) ? @res : join( '', @res );
+
+}
+
+__END__
+
+
+#########  Plain Old Documentation ##############
+
+# Below is all the POD documentation following the conventional chapters
+# as described in (http://perldoc.perl.org/perlpod.html).
+
+=pod
+
+=head1 NAME
+
+PLAY - A declarative approach to executing - all kinds of stuff
+
+=head1 SYNOPSIS
+
+  PLAY --part PART [--manuscript MANUSCRIPT] [--[no]verbose] [--dryrun]
+  PLAY --help | --man
+
+=head1 OPTIONS
+
+=head2 REQUIRED
+
+  --part PART
+
+=over 2
+
+The part to play from the manuscript
+
+=back
+
+=head2 OPTIONAL
+
+  --manuscript MANUSCRIPT
+
+=over 2
+
+The manuscript that contains the different parts to play. This option overrides
+the default manuscript.
+
+=back
+
+  --[no]verbose
+
+=over 2
+
+Prints the whole part from the manuscript before the play begins, and prints
+each shell commands before execution. The default is --[no]verbose, but can be
+set in the manuscript, or overruled using this option.
+
+=back
+
+--dryrun
+
+=over 2
+
+Implies C<--verbose>. Prints all the verbose information, but doesn't actually
+execute anything.
+
+=back
+
+=head2 PROTIP
+
+Options can be applied with double or single dashes as you like, so both
+C<--verbose> and C<-verbose> are valid. You can even abbreveate the option name,
+ it will remain valid as long as it's unique among all options.
+
+B<Example:> since there are no other options except C<--verbose> that begins with
+'v' it means that even C<-v> is valid.
+
+=head1 DESCRIPTION
+
+B<Copyright>
+
+Lars Kruse, 2018, L<www.lakruzz.com|http://www.lakruzz.com>
+
+B<License>
+
+GPL v3.0
+
+B<Repository>
+
+L<github.com/lakruzz/perls|http://github.com/lakruzz/perls>
+
+B<Support and feeback>
+
+Use the L<issues|http://github.com/lakruzz/perls/issues> in the repo.
+
+=cut

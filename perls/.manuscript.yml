@@ -1,0 +1,27 @@
+manuscript:
+  # You can use the environment setting both as an entry under 'manuscript'
+  # Or under the individual parts
+  props:
+    - PLAY_REMOTEREPO:   origin
+    - PLAY_TARGETBRANCH: master
+    - PLAY_REMOTEBRANCH: '`echo $PLAY_REMOTEREPO/$PLAY_TARGETBRANCH`'
+  scene:
+    verbose: true
+  parts:
+    integrate:
+      props:
+        - PLAY_VERSION:      ${CIRCLE_SHA1:=`git rev-parse HEAD`}
+        - PLAY_VER:          '`printenv VERSION | cut -c 1-7`'
+        - PLAY_TARGETVER:    '`git rev-parse --short $PLAY_REMOTEBRANCH`'
+      scene:
+        verbose: true
+      lines:
+        - run:
+          caption: Rebase
+          command: git rebase $REMOTEBRANCH
+        - run:
+          name:    Checkout
+          command: git checkout $TARGETBRANCH
+        - run:
+          name:    Pull
+          command: git pull $REMOTEREPO $TARGETBRANCH
