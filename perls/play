@@ -52,6 +52,8 @@ defined( $Options{part} ) || pod2usage(
 #########  Main program  ########################
 
 our $Yaml = YAML::Tiny->read( $Options{manuscript});
+defined $Yaml->[0]->{manuscript}->{parts}->{$Options{part}} ||
+  croak "No part for '$Options{part}'' found in the man uscript...\n";
 
 $Options{verbose} && prettydump('\%Options');
 $Options{verbose} && prettydump('\$Yaml->[0]->{manuscript}');
