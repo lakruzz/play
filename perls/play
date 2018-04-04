@@ -58,17 +58,15 @@ defined $Yaml->[0]->{manuscript}->{parts}->{$Options{part}} ||
 $Options{verbose} && prettydump('\%Options');
 $Options{verbose} && prettydump('\$Yaml->[0]->{manuscript}');
 
-get_props();
+set_props();
 
 exit(0);
 #########  Functions  ###########################
-sub get_props(){
+sub set_props(){
   defined $Yaml->[0]->{manuscript}->{props} &&
     props_injecter($Yaml->[0]->{manuscript}->{props});
   defined $Yaml->[0]->{manuscript}->{parts}->{$Options{part}}->{props} &&
     props_injecter($Yaml->[0]->{manuscript}->{parts}->{$Options{part}}->{props});
-
-
 }
 
 sub props_injecter($){
@@ -81,8 +79,11 @@ sub props_injecter($){
       {
         $c = qx "echo $varval";
       };
+      chomp($c);
       eval '$ENV{$varkey} = $c';
-      $Options{verbose} && print $varkey."=".`printenv $varkey`;
+      my $liveval = `printenv $varkey`;
+      chomp $liveval;
+      $Options{verbose} && print "$varkey=$liveval\n";
     };
   };
 }

@@ -11,7 +11,7 @@ manuscript:
     integrate:
       props:
         - PLAY_VERSION:      ${CIRCLE_SHA1:=`git rev-parse HEAD`}
-        - PLAY_VER:          '`printenv VERSION | cut -c 1-7`'
+        - PLAY_VER:          '`printenv PLAY_VERSION | cut -c 1-7`'
         - PLAY_TARGETVER:    '`git rev-parse --short $PLAY_REMOTEBRANCH`'
       scene:
         verbose: true
