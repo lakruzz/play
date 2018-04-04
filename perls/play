@@ -44,14 +44,16 @@ GetOptions(
 	)
 ) || pod2usage(-exitval => 1, -verbose => 0);
 
+#########  Main program  ########################
+
+our $Yaml = YAML::Tiny->read( $Options{manuscript});
+set_scene();
+
 defined( $Options{part} ) || pod2usage(
 	-exitval => 1,
 	-verbose => 0,
 	-message => "--part is required");
 
-#########  Main program  ########################
-
-our $Yaml = YAML::Tiny->read( $Options{manuscript});
 defined $Yaml->[0]->{manuscript}->{parts}->{$Options{part}} ||
   croak "No part for '$Options{part}'' found in the man uscript...\n";
 
@@ -60,17 +62,54 @@ $Options{verbose} && prettydump('\$Yaml->[0]->{manuscript}');
 
 set_props();
 
+
 exit(0);
 #########  Functions  ###########################
-sub set_props(){
-  defined $Yaml->[0]->{manuscript}->{props} &&
-    props_injecter($Yaml->[0]->{manuscript}->{props});
-  defined $Yaml->[0]->{manuscript}->{parts}->{$Options{part}}->{props} &&
-    props_injecter($Yaml->[0]->{manuscript}->{parts}->{$Options{part}}->{props});
+
+sub set_scene(){
+  defined $Yaml->[0]->{manuscript}->{scene} &&
+    scene_injector($Yaml->[0]->{manuscript}->{scene});
+  defined $Yaml->[0]->{manuscript}->{parts}->{$Options{part}}->{scene} &&
+    scene_injector($Yaml->[0]->{manuscript}->{parts}->{$Options{part}}->{scene});
 }
 
-sub props_injecter($){
+
+sub scene_injector($){
+  my $scene = shift;
+  foreach my $key (keys($scene)){
+    my $val = $scene->{$key};
+    if ($key =~ /^verbose$|^dryrun$|^debug$/){
+      $val = to_boolean($val);
+    } else {
+      croak "'$key' is not a valid scene option";
+    }
+    $Options{$key} = $val;
+  }
+}
+
+sub to_boolean($){
+  my $val = shift;
+  if ($val =~ /1|^true$/){
+    $val = 1;
+  } else {
+    if ($val =~/0|^false$/){
+      $val = 0;
+    } else{
+      croak "'$val' is not a valid bolean option. Options are [0|1|false|true]"
+    }
+  };
+}
+
+sub set_props(){
+  defined $Yaml->[0]->{manuscript}->{props} &&
+    props_injector($Yaml->[0]->{manuscript}->{props});
+  defined $Yaml->[0]->{manuscript}->{parts}->{$Options{part}}->{props} &&
+    props_injector($Yaml->[0]->{manuscript}->{parts}->{$Options{part}}->{props});
+}
+
+sub props_injector($){
   my $props = shift;
+  # TODO make sure the $props is valid.
   foreach my $var (keys($props)){
     foreach my $varkey (keys($props->[$var])){
       my $varval = $props->[$var]->{$varkey};

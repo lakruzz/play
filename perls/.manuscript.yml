@@ -7,6 +7,7 @@ manuscript:
     - PLAY_REMOTEBRANCH: '`echo $PLAY_REMOTEREPO/$PLAY_TARGETBRANCH`'
   scene:
     verbose: true
+    dryrun: false
   parts:
     integrate:
       props:
@@ -15,6 +16,8 @@ manuscript:
         - PLAY_TARGETVER:    '`git rev-parse --short $PLAY_REMOTEBRANCH`'
       scene:
         verbose: true
+        dryrun: 1
+        debug: 1
       lines:
         - run:
           caption: Rebase
