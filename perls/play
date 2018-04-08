@@ -4,8 +4,6 @@ use strict;                # http://perldoc.perl.org/strict.html
 use Carp;                  # http://perldoc.perl.org/Carp.html
 use Cwd;                   # http://perldoc.perl.org/Cwd.html
 use Data::Dumper;          # https://perldoc.perl.org/Data/Dumper.html
-use JSON::PP;              # http://search.cpan.org/~makamaka/JSON-PP-2.27400/lib/JSON/PP.pm Included in perl cores since 5.14
-
 
 
 # File version
@@ -24,6 +22,7 @@ use YAML::Tiny;            # http://search.cpan.org/dist/YAML-Tiny/lib/YAML/Tiny
 
 # Holds the global variables that are used to cache the value of our options
 our %Options;
+my %tmp_options;
 
 %Options = (
           manuscript => "$scriptdir/.manuscript.yml",
@@ -33,29 +32,34 @@ our %Options;
         );
 
 
+our $Yaml = YAML::Tiny->read( $Options{manuscript}) || croak;
+
 GetOptions(
   (
-  	"part=s"              => \$Options{part},
-		"verbose!"             => \$Options{verbose},
-    "debug"                => \$Options{debug},
-		"dryrun"               => \$Options{dryrun},
+  	"part=s"               => \$Options{part},
+		"verbose!"             => \$tmp_options{verbose},
+    "debug!"               => \$tmp_options{debug},
+		"dryrun!"              => \$tmp_options{dryrun},
 		"help"                 => sub { pod2usage(-exitval => 0, -verbose => 1) },
     "man"                  => sub { pod2usage(-exitval => 0, -verbose => 3) }
 	)
 ) || pod2usage(-exitval => 1, -verbose => 0);
 
-#########  Main program  ########################
+defined $Yaml->[0]->{manuscript}->{parts}->{$Options{part}} ||
+  croak "No part for '$Options{part}'' found in the manuscript...\n";
 
-our $Yaml = YAML::Tiny->read( $Options{manuscript});
 set_scene();
+
+defined $tmp_options{verbose} && do {$Options{verbose} = $tmp_options{verbose}};
+defined $tmp_options{debug}   && do {$Options{debug} = $tmp_options{debug}};
+defined $tmp_options{dryrun}  && do {$Options{dryrun} = $tmp_options{dryrun}};
+
+#########  Main program  ########################
 
 defined( $Options{part} ) || pod2usage(
 	-exitval => 1,
 	-verbose => 0,
 	-message => "--part is required");
-
-defined $Yaml->[0]->{manuscript}->{parts}->{$Options{part}} ||
-  croak "No part for '$Options{part}'' found in the man uscript...\n";
 
 $Options{verbose} && prettydump('\%Options');
 $Options{verbose} && prettydump('\$Yaml->[0]->{manuscript}');

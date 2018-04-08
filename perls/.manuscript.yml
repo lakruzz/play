@@ -1,13 +1,12 @@
 manuscript:
-  # You can use the environment setting both as an entry under 'manuscript'
-  # Or under the individual parts
   props:
     - PLAY_REMOTEREPO:   origin
     - PLAY_TARGETBRANCH: master
     - PLAY_REMOTEBRANCH: '`echo $PLAY_REMOTEREPO/$PLAY_TARGETBRANCH`'
   scene:
+    dryrun: 1
     verbose: true
-    dryrun: false
+    debug:   1
   parts:
     integrate:
       props:
@@ -15,9 +14,9 @@ manuscript:
         - PLAY_VER:          '`printenv PLAY_VERSION | cut -c 1-7`'
         - PLAY_TARGETVER:    '`git rev-parse --short $PLAY_REMOTEBRANCH`'
       scene:
-        verbose: true
-        dryrun: 1
-        debug: 1
+        verbose: 0
+        dryrun: 0
+        debug: 0
       lines:
         - run:
           caption: Rebase
