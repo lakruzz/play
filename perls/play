@@ -42,6 +42,11 @@ GetOptions(
 	)
 ) || pod2usage(-exitval => 1, -verbose => 0);
 
+defined( $Options{part} ) || pod2usage(
+	-exitval => 1,
+	-verbose => 0,
+	-message => "--part is required");
+
 our $Yaml = YAML::Tiny->read( $Options{manuscript}) || croak;
 
 defined $Yaml->[0]->{manuscript}->{parts}->{$Options{part}} ||
@@ -52,11 +57,6 @@ set_scene();
 defined $tmp_options{verbose} && do {$Options{verbose} = $tmp_options{verbose}};
 defined $tmp_options{debug}   && do {$Options{debug} = $tmp_options{debug}};
 defined $tmp_options{dryrun}  && do {$Options{dryrun} = $tmp_options{dryrun}};
-
-defined( $Options{part} ) || pod2usage(
-	-exitval => 1,
-	-verbose => 0,
-	-message => "--part is required");
 
 $Options{verbose} && prettydump('\%Options');
 $Options{verbose} && prettydump('\$Yaml->[0]->{manuscript}');
