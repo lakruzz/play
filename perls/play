@@ -77,9 +77,11 @@ sub read_lines(){
     croak "No lines defined for the part '$Options{part}'\n";
   foreach my $line (keys($lines)){
     my @keys = keys($lines->[$line]);
+    # Pass on to either run() or ansible()
     my $strategy = $keys[0];
     $strategy =~ /^run$|^ansible$/ || croak "Got a key '$strategy'. But only understand 'run' and 'ansible'\n";
-    eval "$strategy(\$lines->[\$line]->{$strategy});";
+    my $res = eval "$strategy(\$lines->[\$line]->{$strategy});";
+    defined($res) || croak $@;
   }
 }
 
@@ -122,6 +124,9 @@ sub scene_injector($){
 
 sub to_boolean($){
   my $val = shift;
+  if (!defined($val)){
+    $val = 0;
+  }
   if ($val =~ /^1$|^true$|^yes$/){
     $val = 1;
   } else {
@@ -134,28 +139,36 @@ sub to_boolean($){
 }
 
 sub set_props(){
+  # First inject the global props
   defined $Yaml->[0]->{manuscript}->{props} &&
     props_injector($Yaml->[0]->{manuscript}->{props});
+  # Then inject the props that belons to the part
   defined $Yaml->[0]->{manuscript}->{parts}->{$Options{part}}->{props} &&
     props_injector($Yaml->[0]->{manuscript}->{parts}->{$Options{part}}->{props});
 }
 
 sub props_injector($){
+  # The props (ENV variables) to set are handed in as the paramater.
+  # To remain the order, the manuscript defines the props as an array.
   my $props = shift;
   # TODO make sure the $props is valid.
   foreach my $var (keys($props)){
     foreach my $varkey (keys($props->[$var])){
       my $varval = $props->[$var]->{$varkey};
       my $c = $varval;
+      # Check if the value is meant to be executed
       if ($varval =~ /`/g || $varval =~ /\$\{/g)
       {
         $c = qx "echo $varval";
       };
+      # TODO: Make sure errors are handled gracefully
       chomp($c);
-      eval '$ENV{$varkey} = $c';
-      my $liveval = `printenv $varkey`;
-      chomp $liveval;
-      $Options{verbose} && print "$varkey=$liveval\n";
+      eval '$ENV{$varkey} = $c'; #inject
+      $Options{verbose} && do {
+        my $liveval = `printenv $varkey`;
+        chomp $liveval;
+        print "$varkey=$liveval\n";
+      }
     };
   };
 }
@@ -232,8 +245,8 @@ sub cmd ($) {
     # verbose
     my @res;
 		$opt{verbose} && print $opt{command}."\n";
-    # $opt{dryrun} || do {@res = qx($cmd)};
-    @res = qx($cmd);
+    $opt{dryrun} || do {@res = qx($cmd)};
+    #@res = qx($cmd);
 
     # die_on_err
     if ( $opt{die_on_err} ) {
@@ -242,6 +255,8 @@ sub cmd ($) {
               $opt{errmsg} :
               "Execution of [$cmd] returned a non-zero value (".( ($?) / 256 ).")";
             croak $msg ;
+            print $msg ;
+            die;
         }
     };
 

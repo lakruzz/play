@@ -14,27 +14,26 @@ manuscript:
         - PLAY_VER:          '`printenv PLAY_VERSION | cut -c 1-7`'
         - PLAY_TARGETVER:    '`git rev-parse --short $PLAY_REMOTEBRANCH`'
       scene:
-        #verbose: 0
-        dryrun: 0
-        #debug: 0
+        verbose: 0
+        dryrun: 1
+        debug: 0
       lines:
         - run:
-            caption: Rebase
-            command: lkjasfd
+            caption: Rebase to remote branch
+            command: git rebase $PLAY_REMOTEBRANCH
             die_on_err: yes
-            errmsg: Wooov!
-#        - run:
-#            caption: Rebase
-#            command: git rebase $REMOTEBRANCH
-#            die_on_err: yes
-#        - run:
-#            caption: Checkout
-#            command: git checkout $TARGETBRANCH
-#        - ansible:
-#            caption: Some install
-#        - run:
-#            caption: Pull
-#            command: git pull $REMOTEREPO $TARGETBRANCH
+        - run:
+            caption: Checkout target branch
+            command: git checkout $PLAYS_TARGETBRANCH
+        - run:
+            caption: Pull latest
+            command: git pull $PLAY_REMOTEREPO $PLAY_TARGETBRANCH
+        - run:
+            caption: Merge
+            command: git merge --ff-only $PLAY_VER
     deploy:
+      props:
+      scene:
+    validate-state:
       props:
       scene:
