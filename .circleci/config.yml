@@ -20,7 +20,7 @@ jobs:
           command: ./play -part gitintro
       - run:
           name: Swap to target branch and test integration
-          command: ./play --part integrate
+          command: ./play --manuscript .circleci/manuscript.yml --part integrate
 
   build:
     working_directory: /app
@@ -30,7 +30,7 @@ jobs:
       - checkout
       - run:
           name: Swap to target branch and integrate
-          command: ./play --part integrate
+          command: ./play --manuscript .circleci/manuscript.yml --part integrate
       - run:
           name: Where am I
           command: |
@@ -65,13 +65,13 @@ jobs:
       - checkout
       - run:
           name: Intro
-          command: ./play --part gitintro
+          command: ./play --manuscript .circleci/manuscript.yml --part gitintro
       - run:
           name: integrate
-          command: ./play --part integrate
+          command: ./play --manuscript .circleci/manuscript.yml --part integrate
       - run:
           name: Deliver
-          command: ./play --part deliver
+          command: ./play --manuscript .circleci/manuscript.yml --part deliver
 
 workflows:
   version: 2
