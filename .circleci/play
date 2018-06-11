@@ -60,8 +60,8 @@ defined $tmp_options{verbose} && do {$Options{verbose} = $tmp_options{verbose}};
 defined $tmp_options{debug}   && do {$Options{debug} = $tmp_options{debug}};
 defined $tmp_options{dryrun}  && do {$Options{dryrun} = $tmp_options{dryrun}};
 
-$Options{verbose} && prettydump('\%Options');
-$Options{verbose} && prettydump('\$Yaml->[0]->{manuscript}');
+$Options{debug} && prettydump('\%Options');
+$Options{debug} && prettydump('\$Yaml->[0]->{manuscript}');
 
 #########  Main program  ########################
 
@@ -92,6 +92,7 @@ sub run($){
     command    => $run->{command},
     dryrun     => $Options{dryrun},
     verbose    => $Options{verbose},
+    debug      => $Options{debug},
     die_on_err => to_boolean($run->{die_on_err}),
     errmsg     => $run->{errmsg}
   );
@@ -234,10 +235,11 @@ sub cmd ($) {
     defined( $opt{dryrun} )       ||  do {$opt{dryrun}       = 0};
   	defined( $opt{return_array} ) ||  do {$opt{return_array} = 0};
     defined( $opt{errmsg} )       ||  do {$opt{errmsg}   = undef};
+    defined( $opt{debug})         ||  do {$opt{debug}        = 0};
 
     if ($opt{dryrun} ){ $opt{verbose} = 1};
 
-    $Options{debug} && do { foreach my $key (keys(%opt)){ print "$key:$opt{$key}\n"} };
+    $opt{debug} && do { foreach my $key (keys(%opt)){ print "  $key:$opt{$key}\n"} };
 
     # merge_errout
 		my $cmd = ( $opt{merge_output} )? $opt{command} . ' 2>&1' : $opt{command};
@@ -246,7 +248,6 @@ sub cmd ($) {
     my @res;
 		$opt{verbose} && print $opt{command}."\n";
     $opt{dryrun} || do {@res = qx($cmd)};
-    #@res = qx($cmd);
 
     # die_on_err
     if ( $opt{die_on_err} ) {

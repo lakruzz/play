@@ -5,7 +5,7 @@ manuscript:
     - PLAY_REMOTEBRANCH: '`echo $PLAY_REMOTEREPO/$PLAY_TARGETBRANCH`'
   scene:
     dryrun:  0
-    verbose: 0
+    verbose: 1
     debug:   0
   parts:
     integrate:
@@ -14,9 +14,9 @@ manuscript:
         - PLAY_VER:          '`printenv PLAY_VERSION | cut -c 1-7`'
         - PLAY_TARGETVER:    '`git rev-parse --short $PLAY_REMOTEBRANCH`'
       scene:
-        verbose: 0
-        dryrun: 1
-        debug: 0
+        verbose: 1
+        dryrun:  0
+        debug:   0
       lines:
         - run:
             caption: Rebase to remote branch
