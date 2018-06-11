@@ -19,7 +19,8 @@ jobs:
           command: .circleci/validate-state.sh
       - run:
           name: Swap to target branch and test integration
-          command: .circleci/integrate.sh
+          # command: .circleci/integrate.sh
+          command: .circleci/play --part integrate
 
   build:
     working_directory: /app
@@ -30,7 +31,8 @@ jobs:
       - checkout
       - run:
           name: Swap to target branch and integrate
-          command: .circleci/integrate.sh
+          # command: .circleci/integrate.sh
+          command: .circleci/play --part integrate
       - run:
           name: Where am I
           command: |
