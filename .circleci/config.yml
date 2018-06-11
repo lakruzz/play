@@ -17,10 +17,10 @@ jobs:
             env | sort | grep "CIRCLE"
       - run:
           name: Intro
-          command: .circleci/play -part gitintro
+          command: ./play -part gitintro
       - run:
           name: Swap to target branch and test integration
-          command: .circleci/play --part integrate
+          command: ./play --part integrate
 
   build:
     working_directory: /app
@@ -30,7 +30,7 @@ jobs:
       - checkout
       - run:
           name: Swap to target branch and integrate
-          command: .circleci/play --part integrate
+          command: ./play --part integrate
       - run:
           name: Where am I
           command: |
@@ -65,13 +65,13 @@ jobs:
       - checkout
       - run:
           name: Intro
-          command: .circleci/play --part gitintro
+          command: ./play --part gitintro
       - run:
           name: integrate
-          command: .circleci/play --part integrate
+          command: ./play --part integrate
       - run:
           name: Deliver
-          command: .circleci/play --part deliver
+          command: ./play --part deliver
 
 workflows:
   version: 2
