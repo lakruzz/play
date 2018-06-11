@@ -246,6 +246,7 @@ sub cmd ($) {
 
     # verbose
     my @res;
+    $opt{dryrun} && print "Running DRY:  ";
 		$opt{verbose} && print $opt{command}."\n";
     $opt{dryrun} || do {@res = qx($cmd)};
 

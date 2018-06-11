@@ -46,19 +46,8 @@ manuscript:
       lines:
         - run:
             caption:
-            command: git config user.name "Circle CI by @Lakruzz"
-            die_on_err: yes
-        - run:
-            caption:
-            command: git config user.email "circleci@lakruzz.com"
-            die_on_err: yes
-        - run:
-            caption:
             command: git remote add ghtoken https://$GHTOKEN@github.com/$PLAY_GITREPO.git
             die_on_err: yes
-        - run:
-            caption:
-            command: git remote --v
         - run:
             caption:
             command: git push ghtoken
@@ -66,4 +55,18 @@ manuscript:
         - run:
             caption:
             command: git push ghtoken :$CIRCLE_BRANCH
+            die_on_err: yes
+    gitintro:
+      props:
+      scene:
+        dryrun: no
+        verbose: yes
+      lines:
+        - run:
+            caption:
+            command: git config user.name "Circle CI by @Lakruzz"
+            die_on_err: yes
+        - run:
+            caption:
+            command: git config user.email "circleci@lakruzz.com"
             die_on_err: yes

@@ -18,6 +18,9 @@ jobs:
           name: Validate state
           command: .circleci/validate-state.sh
       - run:
+          name: Intro
+          command: .circleci/play -part gitintro
+      - run:
           name: Swap to target branch and test integration
           command: .circleci/play --part integrate
 
@@ -63,6 +66,9 @@ jobs:
       - image: lakruzz/jekyll-plus:1.0.1
     steps:
       - checkout
+      - run:
+          name: Intro
+          command: .circleci/play --part gitintro
       - run:
           name: integrate
           command: .circleci/play --part integrate
