@@ -75,7 +75,7 @@ jobs:
 
 workflows:
   version: 2
-  ready_for_jekyll:
+  jekyll_phlow:
     jobs:
       - integrate:
           filters:
