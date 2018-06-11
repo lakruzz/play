@@ -45,25 +45,25 @@ manuscript:
         verbose: yes
       lines:
         - run:
-            caption: Set git user name
+            caption:
             command: git config user.name "Circle CI by @Lakruzz"
             die_on_err: yes
         - run:
-            caption: Set git use email
+            caption:
             command: git config user.email "circleci@lakruzz.com"
             die_on_err: yes
         - run:
-            caption: Add the git remote
+            caption:
             command: git remote add ghtoken https://$GHTOKEN@github.com/$PLAY_GITREPO.git
             die_on_err: yes
         - run:
             caption:
             command: git remote --v
         - run:
-            caption: Push to GitHub target
+            caption:
             command: git push ghtoken
             die_on_err: yes
         - run:
-            caption: Delete the delivered branch
+            caption: 
             command: git push ghtoken :$CIRCLE_BRANCH
             die_on_err: yes
