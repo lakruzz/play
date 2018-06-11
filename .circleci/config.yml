@@ -17,7 +17,7 @@ jobs:
             env | sort | grep "CIRCLE"
       - run:
           name: Intro
-          command: ./play -part gitintro
+          command: ./play --manuscript .circleci/manuscript.yml --part gitintro
       - run:
           name: Swap to target branch and test integration
           command: ./play --manuscript .circleci/manuscript.yml --part integrate
