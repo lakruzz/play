@@ -2,9 +2,10 @@
 version: 2
 jobs:
 
-  validate_integration:
+  integrate:
     working_directory: /app
-    # The primary container is an instance of the first list image listed. Your build commands run in this container.
+    # The primary container is an instance of the first list image listed.
+    # Your build commands run in this container.
     docker:
       - image: lakruzz/jekyll-plus:1.0.1
     steps:
@@ -15,9 +16,6 @@ jobs:
             git --version
             env | sort | grep "CIRCLE"
       - run:
-          name: Validate state
-          command: .circleci/validate-state.sh
-      - run:
           name: Intro
           command: .circleci/play -part gitintro
       - run:
@@ -26,7 +24,6 @@ jobs:
 
   build:
     working_directory: /app
-    # The primary container is an instance of the first list image listed. Your build commands run in this container.
     docker:
       - image: lakruzz/jekyll-plus:1.0.1
     steps:
@@ -80,14 +77,14 @@ workflows:
   version: 2
   ready_for_jekyll:
     jobs:
-      - validate_integration:
+      - integrate:
           filters:
             branches:
               only:
                 - /ready\/.*/
       - build:
           requires:
-            - validate_integration
+            - integrate
       - test:
           requires:
             - build
