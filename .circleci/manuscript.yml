@@ -4,9 +4,9 @@ manuscript:
     - PLAY_TARGETBRANCH: master
     - PLAY_REMOTEBRANCH: '`echo $PLAY_REMOTEREPO/$PLAY_TARGETBRANCH`'
   scene:
-    dryrun: 1
-    verbose: true
-    debug:   yes
+    dryrun:  0
+    verbose: 0
+    debug:   0
   parts:
     integrate:
       props:
@@ -25,15 +25,42 @@ manuscript:
         - run:
             caption: Checkout target branch
             command: git checkout $PLAYS_TARGETBRANCH
+            die_on_err: yes
         - run:
             caption: Pull latest
             command: git pull $PLAY_REMOTEREPO $PLAY_TARGETBRANCH
+            die_on_err: yes
         - run:
             caption: Merge
             command: git merge --ff-only $PLAY_VER
+            die_on_err: yes
     deploy:
       props:
       scene:
-    validate-state:
+    deliver:
       props:
+        - PLAY_GITREPO: '`git remote get-url  $PLAY_REMOTEREPO | sed  s/".*github.com[\/:]//" | sed s/.git//`'
       scene:
+        dryrun:  no
+        verbose: no
+      lines:
+        - run:
+            caption: Set git user name
+            command: git config user.name "Circle CI by @Lakruzz"
+            die_on_err: yes
+        - run:
+            caption: Set git use email
+            command: git config user.email "circleci@lakruzz.com"
+            die_on_err: yes
+        - run:
+            caption:
+            command: git remote add ghtoken https://$GHTOKEN@github.com/$GITREPO.git
+            die_on_err: yes
+        - run:
+            caption: Push to GitHub target
+            command: git push ghtoken
+            die_on_err: yes
+        - run:
+            caption: Delete the delivered branch
+            command: git push ghtoken :$CIRCLE_BRANCH
+            die_on_err: yes

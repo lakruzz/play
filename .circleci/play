@@ -52,8 +52,10 @@ our $Yaml = YAML::Tiny->read( $Options{manuscript}) || croak;
 defined $Yaml->[0]->{manuscript}->{parts}->{$Options{part}} ||
   croak "No part for '$Options{part}' found in the manuscript...\n";
 
+# Setting the scene using the options defined in the manuscript
 set_scene();
 
+# Updating to any updates applied as run parameters
 defined $tmp_options{verbose} && do {$Options{verbose} = $tmp_options{verbose}};
 defined $tmp_options{debug}   && do {$Options{debug} = $tmp_options{debug}};
 defined $tmp_options{dryrun}  && do {$Options{dryrun} = $tmp_options{dryrun}};
@@ -64,9 +66,7 @@ $Options{verbose} && prettydump('\$Yaml->[0]->{manuscript}');
 #########  Main program  ########################
 
 set_props();
-
 read_lines();
-
 
 exit(0);
 #########  Functions  ###########################

@@ -65,7 +65,7 @@ jobs:
       - checkout
       - run:
           name: Deliver
-          command: .circleci/deliver.sh
+          command: .circleci/play --part deliver
 
 workflows:
   version: 2
