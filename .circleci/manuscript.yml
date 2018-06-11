@@ -42,7 +42,7 @@ manuscript:
         - PLAY_GITREPO: '`git remote get-url  $PLAY_REMOTEREPO | sed  s/".*github.com[\/:]//" | sed s/.git//`'
       scene:
         dryrun:  no
-        verbose: no
+        verbose: yes
       lines:
         - run:
             caption: Set git user name
@@ -53,7 +53,7 @@ manuscript:
             command: git config user.email "circleci@lakruzz.com"
             die_on_err: yes
         - run:
-            caption:
+            caption: Add the git remote
             command: git remote add ghtoken https://$GHTOKEN@github.com/$GITREPO.git
             die_on_err: yes
         - run:
