@@ -24,7 +24,7 @@ manuscript:
             die_on_err: yes
         - run:
             caption: Checkout target branch
-            command: git checkout $PLAYS_TARGETBRANCH
+            command: git checkout $PLAY_TARGETBRANCH
             die_on_err: yes
         - run:
             caption: Pull latest
