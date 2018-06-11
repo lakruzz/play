@@ -57,6 +57,12 @@ manuscript:
             command: git remote add ghtoken https://$GHTOKEN@github.com/$PLAY_GITREPO.git
             die_on_err: yes
         - run:
+<<<<<<< Updated upstream
+=======
+            caption:
+            command: git remote --v              
+        - run:
+>>>>>>> Stashed changes
             caption: Push to GitHub target
             command: git push ghtoken
             die_on_err: yes
