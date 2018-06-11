@@ -57,9 +57,6 @@ manuscript:
             command: git remote add ghtoken https://$GHTOKEN@github.com/$PLAY_GITREPO.git
             die_on_err: yes
         - run:
-            caption: integrate
-            command: .circleci/play --part integrate
-        - run:
             caption:
             command: git remote --v
         - run:

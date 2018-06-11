@@ -64,6 +64,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: integrate
+          command: .circleci/play --part integrate
+      - run:
           name: Deliver
           command: .circleci/play --part deliver
 
