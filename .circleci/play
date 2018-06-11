@@ -73,10 +73,10 @@ exit(0);
 
 sub read_lines(){
   my $lines = $Yaml->[0]->{manuscript}->{parts}->{$Options{part}}->{lines};
-  defined $lines ||
+  $lines ||
     croak "No lines defined for the part '$Options{part}'\n";
-  foreach my $line (keys($lines)){
-    my @keys = keys($lines->[$line]);
+  foreach my $line (keys(@$lines)){
+    my @keys = keys(%{$lines->[$line]});
     # Pass on to either run() or ansible()
     my $strategy = $keys[0];
     $strategy =~ /^run$|^ansible$/ || croak "Got a key '$strategy'. But only understand 'run' and 'ansible'\n";
@@ -111,7 +111,7 @@ sub set_scene(){
 
 sub scene_injector($){
   my $scene = shift;
-  foreach my $key (keys($scene)){
+  foreach my $key (keys(%$scene)){
     my $val = $scene->{$key};
     if ($key =~ /^verbose$|^dryrun$|^debug$/){
       $val = to_boolean($val);
@@ -152,8 +152,8 @@ sub props_injector($){
   # To remain the order, the manuscript defines the props as an array.
   my $props = shift;
   # TODO make sure the $props is valid.
-  foreach my $var (keys($props)){
-    foreach my $varkey (keys($props->[$var])){
+  foreach my $var (keys(@$props)){
+    foreach my $varkey (keys(%{$props->[$var]})){
       my $varval = $props->[$var]->{$varkey};
       my $c = $varval;
       # Check if the value is meant to be executed
