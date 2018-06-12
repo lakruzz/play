@@ -24,7 +24,7 @@ our %Options;
 my %tmp_options;
 
 %Options = (
-          manuscript => "$scriptdir/manuscript.yml",
+          manuscript => "manuscript.yml",
           dryrun => 0,
           debug => 0,
           verbose => 0
