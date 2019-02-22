@@ -4,4 +4,4 @@ WORKDIR /
 ADD modules modules
 ADD play play
 
-ENTRYPOINT perl /play $0 $@
+#ENTRYPOINT perl /play $0 $@
