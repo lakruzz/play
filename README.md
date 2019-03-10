@@ -2,14 +2,42 @@
 
 **Play allows you to define shell executions as configurations. You just provide the YAML file and the play script will execute it. It allows you to easily reuse snippets***
 
-To use this utility simply run
+### To use this utility as a CLI simply run
 
-```
-docker run lakruzz/play
+```shell
+docker run lakruzz/play play
 ```
 
 To learn more you can use switches `--man` or `--help`
 
+### To use this utility as a job on Circle CI
+
+The following Circle CI job is a snippet from the [proflow/github/JAM-stack template for Circle CI](https://github.com/prolike/circleci-templates/tree/master/proflow/github/jam) (have a look at the two files in the `.circleci` folder)
+
+```yaml
+  prod-deploy:
+    working_directory: /app/_site
+    docker:
+      - image: lakruzz/play:latest
+        environment:
+          PLAY_TARGET_GH_REPO:   lakruzz/stage-circle-lab
+          PLAY_USER_NAME:        Circle CI by @Lakruzz
+          PLAY_USER_EMAIL:       circleci@lakruzz.com
+    steps:
+      - restore_cache:
+          keys:
+            - the-built-repo-{{ .Revision }}
+      - run:
+          name: Deploy to GitHub Pages
+          command: play --manuscript ../.circleci/play-proflow-cci-gh.yml --part ghpages_deploy
+```
+
+### Reference
+
+The manual is available like this
+```shell
+docker run lakruzz/play play --help
+```
 
 <ul id="index">
   <li><a href="#NAME">NAME</a></li>
