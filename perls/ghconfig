@@ -70,47 +70,19 @@ our $Yaml = YAML::Tiny->read( $Options{config}) || croak;
 defined $Yaml->[0]->{github}->{labels} ||
   croak "No labels defined in the configuration...\n";
 
-# Setting the scene using the options defined in the manuscript
-set_scene(); #TODO get rid of this
 
 # Updating to any updates applied as run parameters
 defined $tmp_options{verbose} && do {$Options{verbose} = $tmp_options{verbose}};
 defined $tmp_options{debug}   && do {$Options{debug} = $tmp_options{debug}};
 defined $tmp_options{dryrun}  && do {$Options{dryrun} = $tmp_options{dryrun}};
 
-$Options{debug} && prettydump('\%Options');
-$Options{debug} && prettydump('\$Yaml->[0]->{github}');
+$Options{debug} && print "\$VAR1 = \%Options:\n".Dumper(\%Options);
+$Options{debug} && print "\$VAR1 = \$Yaml->[0]->{github}:\n".Dumper(\$Yaml->[0]->{github});
 
 #########  Main program  ########################
-
-# clear_defaults();
-foreach my $group ( sort(keys($Yaml->[0]->{github}{labels})) ){
-  my %values;
-  print $group."\n"; # TODO delete
-  insert_props("{github}{labels}{default}", 'defaults', \%values);
-  if ($group ne 'default'){
-    insert_props("{github}{labels}{$group}", 'defaults', \%values);
-  }
-#  my @labels = parse("{github}{labels}{$group}{labels}");
-#  print Dumper(\@labels);
-
-  foreach my $label (parse("{github}{labels}{$group}{labels}")){
-     print $label."\n";
-#    print parse("{github}{labels}{$group}{labels}->[$label]->{label}{name}")
-#    insert_props("{github}{labels}{$group}{labels}->[$label]->{label}", "label", \%values);
-  }
-  #print Dumper(\%values); # TODO delete
-
-}
-
-
-#my %values;
-#insert_props('{github}{labels}{default}', 'defaults', \%values);
-#prettydump('\%values');
-#insert_props('{github}{labels}{action}', 'defaults', \%values);
-
-#insert_props('{github}{labels}{action}[0]', 'label', \%values);
-#prettydump('\%values');
+my @labels;
+compile_labels(\@labels);
+print Dumper(\@labels);
 die;
 
 read_lines();
@@ -118,21 +90,32 @@ read_lines();
 exit(0);
 #########  Functions  ###########################
 
-sub read_lines(){
-  my $lines = $Yaml->[0]->{manuscript}->{parts}->{$Options{part}}->{lines};
-  $lines ||
-    croak "No lines defined for the part '$Options{part}'\n";
-  foreach my $line (keys(@$lines)){
-    my @keys = keys(%{$lines->[$line]});
-    # Pass on to either run() or ansible()
-    my $strategy = $keys[0];
-    $strategy =~ /^run$|^ansible$/ || croak "Got a key '$strategy'. But only understand 'run' and 'ansible'\n";
-    my $res = eval "$strategy(\$lines->[\$line]->{$strategy});";
-    defined($res) || croak $@;
+
+sub compile_labels($){
+  my $labels_ref = shift;
+  foreach my $group ( sort(keys($Yaml->[0]->{github}{labels})) ){
+    my %values;
+    insert_props("{github}{labels}{default}", 'defaults', \%values);
+    if ($group ne 'default'){
+      insert_props("{github}{labels}{$group}", 'defaults', \%values);
+    }
+
+    my $labels =      parse("{github}{labels}{$group}{labels}");
+    foreach my $label (keys(@$labels)){
+      insert_props("{github}{labels}{$group}{labels}[$label]{label}", 'label', \%values);
+    #  print Dumper(\%values);
+
+      my $name        = (defined($values{prefix}) ? $values{prefix}.$values{delimiter_prefix} : '').$values{name};
+      my $description = $values{description}.(defined($values{suffix}) ? $values{delimiter_suffix}.$values{suffix} : '');
+
+      push(@$labels_ref, { name         => $name,
+                           description  => $description,
+                           color        => $values{color}
+                         }
+      );
+    }
   }
 }
-
-
 
 sub run($){
   my $run = shift;
@@ -147,30 +130,6 @@ sub run($){
   );
 }
 
-sub ansible($){
-  print "Ansible - Not Implemente Yet\n";
-}
-
-sub set_scene(){
-  defined $Yaml->[0]->{manuscript}->{scene} &&
-    scene_injector($Yaml->[0]->{manuscript}->{scene});
-  defined $Yaml->[0]->{manuscript}->{parts}->{$Options{part}}->{scene} &&
-    scene_injector($Yaml->[0]->{manuscript}->{parts}->{$Options{part}}->{scene});
-}
-
-
-sub scene_injector($){
-  my $scene = shift;
-  foreach my $key (keys(%$scene)){
-    my $val = $scene->{$key};
-    if ($key =~ /^verbose$|^dryrun$|^debug$/){
-      $val = to_boolean($val);
-    } else {
-      croak "'$key' is not a valid scene option";
-    }
-    $Options{$key} = $val;
-  }
-}
 
 sub parse($){
   # The parameter is a string, that defined the path to a node in the %hash
@@ -184,22 +143,6 @@ sub parse($){
 }
 
 
-sub to_boolean($){
-  my $val = shift;
-  if (!defined($val)){
-    $val = 0;
-  }
-  if ($val =~ /^1$|^true$|^yes$/){
-    $val = 1;
-  } else {
-    if ($val =~/^0$|^false$|^no$/){
-      $val = 0;
-    } else{
-      croak "'$val' is not a valid bolean option. Options are [0|1|false|true]"
-    }
-  };
-}
-
 sub insert_props($$$){
   my $node = shift;
   my $scheme = shift;
@@ -209,58 +152,6 @@ sub insert_props($$$){
   }
 }
 
-sub props_injector($){
-  # The props (ENV variables) to set are handed in as the paramater.
-  # To remain the order, the manuscript defines the props as an array.
-  my $props = shift;
-  # TODO make sure the $props is valid.
-  foreach my $var (keys(@$props)){
-    foreach my $varkey (keys(%{$props->[$var]})){
-      my $varval = $props->[$var]->{$varkey};
-      my $c = $varval;
-      # Check if the value is meant to be executed
-      if ($varval =~ /`/g || $varval =~ /\$\{/g)
-      {
-        $c = qx "echo $varval";
-      };
-      # TODO: Make sure errors are handled gracefully
-      chomp($c);
-      eval '$ENV{$varkey} = $c'; #inject
-      $Options{verbose} && do {
-        my $liveval = `printenv $varkey`;
-        chomp $liveval;
-        print "$varkey=$liveval\n";
-      }
-    };
-  };
-}
-
-sub prettydump($){ #TODO only works on globale variables, the whole pretty thing should be done differenly, the functions should take a ref to the item to dump
-# Used for debugging - dumps a pretty print of
-# the content of the valiable passed in - by name
-# Example:
-#    my $scalar = "test";
-#    my @list = (1,2,'abd');
-#    my %hash = ('b' => 'abc','a' => 1);
-#    prettydump('\$scalar');
-#    prettydump('\@list');
-#    prettydump('\%hash');
-
-    my $name = shift;
-    my $prettyname = $name =~ s/^\\//r;
-    my $ref = eval("$name");
-
-    my $dump = Dumper($ref) =~
-      s/\$VAR1/$prettyname/r =~
-      s/('token'.*=>.*)'.*'/$1 '**NOT SHOWN**'/gr;
-
-    if ($name ne $prettyname){
-      $dump = $dump =~
-        s/(^.*=\s*)[\{\[]/$1\(/r =~
-        s/[\}\]];$/\);/r;
-    }
-    print $dump;
-}
 
 sub cmd ($) {
 # Safe execution of shell commands

@@ -3,14 +3,14 @@ github:
   behaviour: # specify the general behaviour, like what to do with undefined labels and milestones
     undefined_label: safe-delete #[safe-delete|force-delete|ignore] ignore is default
   labels: # Lables are defined in groups, each group can define it's own set of defaults: color, suffix, prefix, suffix.delimiter, prefix.delimiter, description
-    default:  # Default is a special group, it's not required, but if it exists, the defaults defined here will have overall (global) effect, unless they are overridden by the individual groups or labels. 
+    default:  # Default is a special group, it's not required, but if it exists, the defaults defined here will have overall (global) effect, unless they are overridden by the individual groups or labels.
       color:     random
       delimiter:
         prefix:  " - "
         suffix:  ", "
     action:
       color:      "#009900"
-      prefix:     "Action"
+      prefix:     "action"
       suffix:     "Must be assigned to someone when in this state"
       labels:
         - label:
@@ -19,7 +19,7 @@ github:
             color:       "#6EB82C"
         - label:
             name:        "needs grooming"
-            description: "Used to mark an issue for further grooming - must be assigned to someone when in this state"
+            description: "Used to mark an issue for further grooming"
             color:       "#009800"
     marker:
       color:      "#5119e7"
@@ -52,30 +52,36 @@ github:
             name:    "4 - won't have"
             color:   "#E8A80F"
     size:
-      prefix: "Size"
+      prefix: "size"
       color:    "#000099"
       labels:
         - label:
             name:        "1 - small"
             color:       "#20B4E5"
+            description: "Finish al lot - more than 8 - small tasks per day"
         - label:
             name:        "2 - medium"
             color:       "#208FE5"
+            description:  "Finish 2-3 medium tasks per day"
         - label:
             name:        "3 - large"
             color:       "#0052CC"
+            description: "A full day's work"
         - label:
             name:        "4 - too big"
             color:       "#100B6B"
+            description: "More than a day's work"
     status:
       color:    "#EDEDED"
+      prefix: "status"
+      description: "Used to define columns in Waffle"
       labels:
         - label:
-            name:        "Status - duplicate"
+            name:        "duplicate"
             color:       "#111111"
         - label:
-            name:        "Status - to do"
+            name:        "to do"
         - label:
-            name:        "Status - in progress"
+            name:        "in progress"
         - label:
-            name:       "Status - up next"
+            name:        "up next"
