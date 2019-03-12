@@ -1,0 +1,81 @@
+github:
+  version: 1.0.0
+  behaviour: # specify the general behaviour, like what to do with undefined labels and milestones
+    undefined_label: safe-delete #[safe-delete|force-delete|ignore] ignore is default
+  labels: # Lables are defined in groups, each group can define it's own set of defaults: color, suffix, prefix, suffix.delimiter, prefix.delimiter, description
+    default:  # Default is a special group, it's not required, but if it exists, the defaults defined here will have overall (global) effect, unless they are overridden by the individual groups or labels. 
+      color:     random
+      delimiter:
+        prefix:  " - "
+        suffix:  ", "
+    action:
+      color:      "#009900"
+      prefix:     "Action"
+      suffix:     "Must be assigned to someone when in this state"
+      labels:
+        - label:
+            name:        "awaiting feed-back"
+            description: "Used to mark a label as being in a wait state"
+            color:       "#6EB82C"
+        - label:
+            name:        "needs grooming"
+            description: "Used to mark an issue for further grooming - must be assigned to someone when in this state"
+            color:       "#009800"
+    marker:
+      color:      "#5119e7"
+      # prefix:
+      # suffix:
+      labels:
+        - label:
+            name:        "briefing"
+            description: "Used to indicate that this is a briefing (story) - workable issues will spawn off from this"
+            color:       "#C7DEF8"
+        - label:
+            name:        "tech-challenge"
+            description: "Used to mark an issue as challenge, which requires help"
+            color:       "#5319E7"
+    priority:
+      prefix: "prio"
+      color: "#990000"
+      description: "MoSCoW priorities"
+      labels:
+        - label:
+            name:    "1 - must have"
+            color:   "#E83D0F"
+        - label:
+            name:    "2 - should have"
+            color:   "#EB6420"
+        - label:
+            name:    "3 - could have"
+            color:   "#E8850F"
+        - label:
+            name:    "4 - won't have"
+            color:   "#E8A80F"
+    size:
+      prefix: "Size"
+      color:    "#000099"
+      labels:
+        - label:
+            name:        "1 - small"
+            color:       "#20B4E5"
+        - label:
+            name:        "2 - medium"
+            color:       "#208FE5"
+        - label:
+            name:        "3 - large"
+            color:       "#0052CC"
+        - label:
+            name:        "4 - too big"
+            color:       "#100B6B"
+    status:
+      color:    "#EDEDED"
+      labels:
+        - label:
+            name:        "Status - duplicate"
+            color:       "#111111"
+        - label:
+            name:        "Status - to do"
+        - label:
+            name:        "Status - in progress"
+        - label:
+            name:       "Status - up next"
