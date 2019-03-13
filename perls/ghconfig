@@ -4,6 +4,8 @@ use strict;                # http://perldoc.perl.org/strict.html
 use Carp;                  # http://perldoc.perl.org/Carp.html
 use Cwd;                   # http://perldoc.perl.org/Cwd.html
 use Data::Dumper;          # https://perldoc.perl.org/Data/Dumper.html
+use JSON::PP;              # http://search.cpan.org/~makamaka/JSON-PP-2.27400/lib/JSON/PP.pm Included in perl cores since 5.14
+
 
 # File version
 our $VERSION    = "1.0";                             #major.minor
@@ -82,7 +84,19 @@ $Options{debug} && print "\$VAR1 = \$Yaml->[0]->{github}:\n".Dumper(\$Yaml->[0]-
 #########  Main program  ########################
 my @labels;
 compile_labels(\@labels);
-print Dumper(\@labels);
+my $gh_api = "https://api.github.com/";
+my ($org_header, @org_json );
+# my $h_type = (defined $opt{organization})? 'orgs/' : 'users/';
+my $h_type = 'users/';
+
+croak "Hmmm?" if &ghapi( # Get the organization details
+  rest => $gh_api.$h_type.'lakruzz',
+  header => \$org_header,
+  json => \@org_json,
+  token => $Options{token} );
+
+print Dumper(\@org_json);
+
 die;
 
 read_lines();
@@ -219,6 +233,112 @@ sub cmd ($) {
 
 }
 
+sub ghapi ($){
+  # REST calls to the GitHub API
+  #Example:
+  #
+  #  my ($header, @json);
+  #  die unless ghapi( rest => 'https://api.github.com/users/lakruzz',
+  #    header => \$header,
+  #    json => \@json,
+  #    token => $opt{token} );
+  #  print $json[0]->{repos_url};
+
+  # RETURNS:
+  # 0 for successful execution and 1 if errors occured.
+
+  # INPUT
+  # A hash containing key:value tuples of options.
+  #   rest => (string) [required]
+  #   query => (string) [optional] (CGI parameters)
+  #   token => (scalar) [optional]
+  #   header => (scalar reference)
+
+  # OUTPUT PARAMETERS
+  # Will contain the JSON objects decoded from the REST call
+  #   json list reference) [required]
+
+
+  my %opt = @_;
+  my $curl = ( $opt{token} ) ? 'curl -s -i -u :'.$opt{token}.' ':'curl -s -i ';
+  my $j = JSON::PP->new->utf8;
+  $j->relaxed([1]);
+
+	my $q_delim;
+	defined($opt{query}) && do {
+		$q_delim = ($opt{rest} =~ /\?/) ? "&" : "?";
+	};
+
+  my $cmd = $curl.$opt{rest}.$q_delim.$opt{query};
+	# make the URL command line safe, escape [?=&]
+	$cmd =~ s/\?/\\\?/g;
+	$cmd =~ s/\=/\\\=/g;
+	$cmd =~ s/\&/\\\&/g;
+
+  my $res =	&cmd(
+  	command => $cmd,
+  	verbose => $Options{verbose}
+  );
+
+	${$opt{header}} = '';
+
+	if ( $res =~ /^(.*)\n(\{.*\})$/s  # contains only one JSON
+	){
+    ${$opt{header}} = $1;
+		push (@{$opt{json}}, $j->decode($2) );
+	} else {
+		croak "Not a valid JSON, and not a list of JSONs either"
+		  unless $res =~ /^(.*)\n(\[.*\])$/s;
+		${$opt{header}} = $1;
+		my $json_list = $2;
+		$json_list =~ s/\[//; # The reading '[' will have to go
+	  $json_list =~ s/\]//; # and the tailing ']' as well
+		foreach my $json (split (/(?!\})\s*,\s*(?=\{)/ , $json_list )){
+		  # using lookbehind (?! ) and lookahead (?= ) to make the match larger, than what we're actuallyy splitting on (the comman and the whitespace just before and after).
+			push (@{$opt{json}}, $j->decode($json) );
+		};
+	};
+
+  my $val;
+
+	croak unless &get_from_ghapi_header(
+	  header => $opt{header},
+		key => 'status',
+		value => \$val);
+
+	return not $val =~ /OK/;
+
+};
+
+sub get_from_ghapi_header($){
+  # Reads a value of a specified key in a header returned from a succesful call to the GitHub API.
+  # RETURN:
+  #  1 if key is found and value retrieved.
+  #  0 if not.
+  #
+  # NOTE: Even invalid calls to the GitHub API indicates successful execution, the actual error state must be read from the header.
+  #
+  # Example:
+  #
+  #  my $val;
+  #  croak unless get_from_ghapi_header(
+  #    header => $opt{header},
+  #    key => 'status',
+  #    value => \$val);
+  #  return not $val =~ /OK/;
+  # INPUT
+  #   header => (scalar reference) [required]
+  #             A reference to a scalar containing the header as returned from a valid GitHub API call.
+  #   key => (scaler) [required]
+  #             The key to lookup in the header
+  #   value => (scalar reference) [required]
+
+	my %opt = @_;
+	my $regexp = '^('.$opt{key}.'):\s*(.*)\s*$';
+	my $status = ( ${$opt{header}} =~ /$regexp/mi ) ? 1 : 0;
+	${$opt{value}} = $2;
+	return $status;
+};
 __END__
 
 
