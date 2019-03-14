@@ -11,6 +11,7 @@ system('echo "yes" \| cpan'); # cpan asks for a config on it's irst run, answer 
 install('lib');
 install('YAML');
 install('Test2:V0');
+install('Test2:Harness');
 
 # system('cpan local:lib');
 # system('cpan App:cpanminus');

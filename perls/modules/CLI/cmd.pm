@@ -4,7 +4,10 @@ require 5.14.0;
 use strict;                # http://perldoc.perl.org/strict.html
 use Carp;                  # http://perldoc.perl.org/Carp.html
 
-sub cmd ($) {
+our @ISA    = qw(Exporter);
+our @EXPORT = qw(cmd);        #Export only cmd
+
+sub cmd {
   # Safe execution of shell commands
   # Input is a hash containing the options and parameters to execute:
   #
